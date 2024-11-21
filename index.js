@@ -1,10 +1,5 @@
-const express = require('express');
-const { Client, GatewayIntentBits } = require('discord.js');
-const path = require('path'); // Thêm thư viện path để xử lý đường dẫn
-require('dotenv').config();
-
-const app = express();
-const PORT = process.env.PORT || 3000;
+import { Client, GatewayIntentBits } from 'discord.js';
+import 'dotenv/config';
 
 const client = new Client({
   intents: [
@@ -14,10 +9,7 @@ const client = new Client({
   ],
 });
 
-// Đảm bảo tệp HTML được phục vụ
-app.use(express.static(path.join(__dirname, 'public')));  // Thêm dòng này để phục vụ tệp HTML từ thư mục 'public'
-
-// Danh sách các Channel ID mà bạn muốn lấy tin nhắn
+// Danh sách các Channel ID
 const channelIds = [
   "1300298976951795843",
   "1300298978008760375",
@@ -38,22 +30,23 @@ const channelIds = [
   // ... Thêm các Channel ID khác ở đây
 ];
 
-// API lấy tất cả thông tin tin nhắn trả lời nhúng
-app.get('/api/channels', async (req, res) => {
+// Đăng nhập bot Discord
+client.login(process.env.BOT_TOKEN).then(() => {
+  console.log("Discord bot logged in!");
+});
+
+export default async function handler(req, res) {
   try {
     const data = {};
 
-    // Lặp qua các kênh và lấy dữ liệu tin nhắn trả lời nhúng
     for (const channelId of channelIds) {
       const channel = await client.channels.fetch(channelId);
       const messages = await channel.messages.fetch({ limit: 3 });
 
-      // Lọc các tin nhắn có embeds
       const embedMessages = messages.filter(msg => msg.embeds.length > 0);
 
-      // Lưu thông tin tin nhắn trả lời nhúng theo tên kênh
       data[channelId] = embedMessages.map(msg => {
-        const embeds = msg.embeds.map(embed => ({
+        return msg.embeds.map(embed => ({
           jobId: msg.id,
           scriptId: msg.author.id,
           title: embed.title || 'No Title',
@@ -68,21 +61,12 @@ app.get('/api/channels', async (req, res) => {
             value: field.value,
           })),
         }));
-
-        return embeds;
       });
     }
 
-    // Trả về dữ liệu phân chia theo channelId
-    res.json(data);
+    res.status(200).json(data);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Failed to fetch channel data' });
   }
-});
-
-// Đăng nhập bot Discord
-client.login(process.env.BOT_TOKEN).then(() => {
-  console.log("Discord bot logged in!");
-  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-});
+}
