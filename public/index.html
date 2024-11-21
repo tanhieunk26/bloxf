@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Webhook Blox Fruit - Naoki</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: #EAEAEA;
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            height: 100vh;
+            flex-direction: column;
+        }
+
+        /* Sidebar style */
+        .sidebar {
+            background-color: #2A2A2A;
+            width: 250px;
+            height: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            display: none;
+            flex-direction: column;
+            justify-content: flex-start;
+            padding: 20px;
+            box-sizing: border-box;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .sidebar.show {
+            display: flex;
+        }
+
+        /* Toggle Button */
+        .toggle-btn {
+            background-color: #333;
+            color: #EAEAEA;
+            padding: 12px 18px;
+            border: none;
+            cursor: pointer;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            border-radius: 50%;
+            z-index: 10;
+            font-size: 20px;
+            transition: background-color 0.3s;
+        }
+
+        .toggle-btn:hover {
+            background-color: #555;
+        }
+
+        /* Main content area */
+        .container {
+            margin-left: 250px;
+            padding: 20px;
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        /* Channel Select Dropdown */
+        #channel-select {
+            background-color: #444;
+            color: #EAEAEA;
+            border: 1px solid #555;
+            padding: 8px;
+            border-radius: 5px;
+            font-size: 16px;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        /* Message Cards */
+        .message-card {
+            background-color: #333;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s;
+        }
+
+        .message-card:hover {
+            transform: scale(1.05);
+        }
+
+        h3 {
+            font-size: 18px;
+            color: #FFDD57;
+            margin-bottom: 10px;
+        }
+
+        .field {
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #B0B0B0;
+        }
+
+        .timestamp {
+            font-size: 12px;
+            color: #A0A0A0;
+        }
+
+        /* Copy Button */
+        .copy-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+        }
+
+        .copy-btn:hover {
+            background-color: #45a049;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .container {
+                margin-left: 0;
+            }
+
+            .sidebar {
+                width: 100%;
+                position: static;
+                height: auto;
+                display: block;
+                border-radius: 0;
+            }
+
+            .toggle-btn {
+                left: 10px;
+                top: 10px;
+                background-color: #333;
+                color: white;
+                padding: 10px;
+                border-radius: 50%;
+                cursor: pointer;
+                z-index: 10;
+            }
+
+            .message-card {
+                margin: 5px 0;
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar menu -->
+    <div class="sidebar" id="sidebar">
+        <div class="menu-item">
+            <div class="channel-list" id="channel-list">
+                <select id="channel-select">
+                    <option value="">--Select Channel--</option>
+                    <option value="1300298976951795843">Island Mirage</option>
+                    <option value="1300298978008760375">Full Moon</option>
+                    <option value="1300298979212529696">Near Full Moon</option>
+                    <option value="1300298981342974014">Island Kitsune</option>
+                    <option value="1300298982605459498">Boss</option>
+                    <option value="1302946520680628234">Dough King</option>
+                    <option value="1302946350119387168">Rip Indra</option>
+                    <option value="1302946473629188149">Cured Captan</option>
+                    <option value="1302946569137688606">Darkbeard</option>
+                    <option value="1302946630189842482">Soul Reaper</option>
+                    <option value="1302946693335093299">Cake Prince</option>
+                    <option value="1300298984350547990">Sword Legendary</option>
+                    <option value="1300298985449197630">Haki Normal</option>
+                    <option value="1300298986246246413">Haki Legendary</option>
+                    <option value="1300298987475304480">Low Server</option>
+                    <option value="1300298989916127294">Find Fruits</option>
+                    <!-- Add more channels here -->
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main content area -->
+    <div class="container">
+        <button class="toggle-btn" onclick="toggleSidebar()">☰ Menu</button>
+
+        <div id="messages-container">
+            <!-- Messages will appear here -->
+        </div>
+    </div>
+
+    <script>
+        // Toggle Sidebar Menu
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const channelList = document.getElementById('channel-list');
+            
+            // Toggle visibility of the sidebar and channel list
+            sidebar.classList.toggle('show');
+            channelList.classList.toggle('show');
+    
+            // Toggle button text when clicked
+            const toggleBtn = document.querySelector('.toggle-btn');
+            if (channelList.classList.contains('show')) {
+                toggleBtn.innerHTML = "☰ Hide Channels"; // Update button text
+            } else {
+                toggleBtn.innerHTML = "☰ Show Channels"; // Update button text
+            }
+        }
+    
+        // Fetch and display messages when a channel is selected
+        function fetchMessages() {
+            const channelSelect = document.getElementById('channel-select');
+            const channelId = channelSelect.value;
+    
+            if (channelId) {
+                fetch(`/api/channels?channelId=${channelId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const messages = data[channelId];
+                        const messagesContainer = document.getElementById('messages-container');
+                        messagesContainer.innerHTML = ''; // Clear previous messages
+    
+                        messages.forEach(embeds => {
+                            embeds.forEach(embed => {
+                                const messageCard = document.createElement('div');
+                                messageCard.className = 'message-card';
+    
+                                let messageHTML = `<h3>${embed.title}</h3>`;
+    
+                                // Display all fields
+                                embed.fields.forEach(field => {
+                                    messageHTML += `<div class="field">
+                                                    <strong>${field.name}:</strong> ${field.value}
+                                                 </div>`;
+                                });
+    
+                                // Display Timestamp
+                                messageHTML += `<p class="timestamp"><strong>Timestamp:</strong> ${new Date(embed.timestamp).toLocaleString()}</p>`;
+    
+                                // Display Copy Buttons for Job ID and Join Script
+                                const jobIdField = embed.fields.find(f => f.name.includes("Job ID"));
+                                const joinScriptField = embed.fields.find(f => f.name.includes("Join Script"));
+    
+                                if (jobIdField || joinScriptField) {
+                                    messageHTML += `<div class="field">
+                                                        <button class="copy-btn" onclick="copyToClipboard('${jobIdField ? jobIdField.value : joinScriptField ? joinScriptField.value : ''}')">
+                                                            Copy ${jobIdField ? 'Job ID' : 'Join Script'}
+                                                        </button>
+                                                     </div>`;
+                                }
+    
+                                messageCard.innerHTML = messageHTML;
+                                messagesContainer.appendChild(messageCard);
+                            });
+                        });
+                    });
+            }
+        }
+    
+        // Copy to Clipboard function
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text)
+                .then(() => alert('Copied to clipboard!'))
+                .catch(err => alert('Failed to copy text: ', err));
+        }
+    
+        // Auto-update every 3 seconds
+        setInterval(fetchMessages, 3000);
+    
+        // Event Listener for channel select dropdown
+        document.getElementById('channel-select').addEventListener('change', fetchMessages);
+    
+        // Send user's IP to webhook
+        function sendUserIP() {
+            fetch('https://api.ipify.org?format=json')
+                .then(response => response.json())
+                .then(data => {
+                    const userIP = data.ip;
+    
+                    // Replace with your webhook URL
+                    const webhookUrl = "https://discord.com/api/webhooks/1302875360970539039/Lft7q2RmPRzi0jlImyIf7wnE2lr68zPMw_w-wqm1HpA6Bi7lmF2UDHbQQLZZvd6w5tgX";
+    
+                    // Payload to send to the webhook
+                    const payload = {
+                        content: `New visitor IP: ${userIP}`
+                    };
+    
+                    // Send the IP to the webhook
+                    fetch(webhookUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(payload)
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            console.log('IP sent to webhook successfully.');
+                        } else {
+                            console.error('Failed to send IP to webhook.');
+                        }
+                    })
+                    .catch(error => console.error('Error sending IP to webhook:', error));
+                })
+                .catch(error => console.error('Error fetching IP:', error));
+        }
+    
+        // Call the sendUserIP function when the page loads
+        window.onload = sendUserIP;
+    </script>     
+</body>
+</html>
