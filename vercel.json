@@ -1,6 +1,6 @@
 {
   "version": 2,
   "routes": [
-    { "src": "/api/(.*)", "dest": "/api/channels.js" }
+    { "src": "/api/channels", "dest": "/channels.js" }
   ]
 }
