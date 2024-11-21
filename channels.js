@@ -1,6 +1,8 @@
-import { Client, GatewayIntentBits } from 'discord.js';
-import 'dotenv/config';
+const express = require('express');
+const { Client, GatewayIntentBits } = require('discord.js');
+require('dotenv').config();
 
+const app = express();
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -30,12 +32,8 @@ const channelIds = [
   // ... Thêm các Channel ID khác ở đây
 ];
 
-// Đăng nhập bot Discord
-client.login(process.env.BOT_TOKEN).then(() => {
-  console.log("Discord bot logged in!");
-});
-
-export default async function handler(req, res) {
+// Endpoint chính
+app.get('/api/channels', async (req, res) => {
   try {
     const data = {};
 
@@ -44,29 +42,25 @@ export default async function handler(req, res) {
       const messages = await channel.messages.fetch({ limit: 3 });
 
       const embedMessages = messages.filter(msg => msg.embeds.length > 0);
-
       data[channelId] = embedMessages.map(msg => {
         return msg.embeds.map(embed => ({
-          jobId: msg.id,
-          scriptId: msg.author.id,
           title: embed.title || 'No Title',
           description: embed.description || 'No Description',
-          color: embed.color,
-          author: embed.author ? embed.author.name : 'No Author',
-          image: embed.image ? embed.image.url : 'No Image',
-          footer: embed.footer ? embed.footer.text : 'No Footer',
-          timestamp: embed.timestamp,
-          fields: embed.fields.map(field => ({
-            name: field.name,
-            value: field.value,
-          })),
         }));
       });
     }
 
-    res.status(200).json(data);
+    res.json(data);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Failed to fetch channel data' });
   }
-}
+});
+
+// Đăng nhập bot Discord
+client.login(process.env.BOT_TOKEN).then(() => {
+  console.log("Discord bot logged in!");
+});
+
+// Xuất app để Vercel xử lý
+module.exports = app;
